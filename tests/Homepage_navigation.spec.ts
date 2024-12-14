@@ -23,12 +23,41 @@ test('Verify footer links' , async({ page }) => {
 
         await expect(link).toBeVisible();
 
-        const linkText = await link.textContent()
+        //const linkText = await link.textContent()
         const href = await link.getAttribute('href')
 
         expect(href).not.toBeNull()
         expect(href).not.toBe('')
 
         await expect(link).toHaveAttribute('href', href)
+    }
+})
+
+
+test('Test invalid or broken link' , async({ page }) => {
+    const footerSec = page.locator('.main-footer')
+    await page.waitForSelector('.main-footer')
+    await expect(footerSec).toBeVisible()
+
+    const footerLinks = footerSec.locator('a')
+    const linkCount = await footerLinks.count()
+
+    for(let i = 0; i < linkCount; i++) {
+        const link = footerLinks.nth(i)
+
+        if(!await link.isVisible()) {
+            continue
+        }
+
+        const href = await link.getAttribute('href')
+
+        const response = await page.goto(`${href}/test`)
+
+        if(response) {
+            expect(response.status()).not.toBe(200)
+        } else {
+            expect(response).not.toBeNull()
+        }
+        
     }
 })
